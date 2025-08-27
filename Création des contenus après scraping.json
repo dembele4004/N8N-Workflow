@@ -1,0 +1,1976 @@
+{
+  "name": "Création des contenus après scraping",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX"
+            }
+          ]
+        }
+      },
+      "id": "9a2b9904-b847-4d6a-b1ef-d2a9fc6213c9",
+      "name": "Cron (every 2h)1",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -5024,
+        -15328
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4",
+          "mode": "list",
+          "cachedResultName": "Brand Blogs Content",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1285664785,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit#gid=1285664785"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -4800,
+        -15328
+      ],
+      "id": "14d5a074-a554-4976-b948-2bebdf67d1f8",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0CsV0GZSEqe9cKwx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -4576,
+        -15328
+      ],
+      "id": "e9ca6a57-8b26-42d0-9e6d-eaedecf4d35b",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.scrapping }}",
+                    "rightValue": "rss",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "293adc99-bf8d-4947-95b4-7ab2a3e72c5e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8e2e7110-c595-4d35-8d50-97c1399ba111",
+                    "leftValue": "={{ $json.scrapping }}",
+                    "rightValue": "http",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4352,
+        -15584
+      ],
+      "id": "fad173ba-29fc-48e6-a557-c9cd9631321a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['RSS/Feed URL'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -3904,
+        -16000
+      ],
+      "id": "2a644e82-db03-4315-a5c2-e21f97f7a3ab",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['Blog/News URL'] }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 1000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4128,
+        -14800
+      ],
+      "id": "8bee5bde-b6f9-4c19-9e8a-a83dc7eb9609",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('If').item.json.Link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3008,
+        -14512
+      ],
+      "id": "c7ab2bd0-fb6a-431a-be14-3b9c1c778f10",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2272,
+        -16304
+      ],
+      "id": "4888662a-a67a-46ee-b564-1d151583ed14",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OvzWazpUQAPU8BZ9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"section post-body\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -17344
+      ],
+      "id": "6f873943-8a98-43ae-b2d9-c659506475be",
+      "name": "Grandstream"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"blog-con\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Vérifier si src est en base64\n        if src and src.startswith(\"data:\"):\n            img.decompose()  # Supprime l'image si base64\n            continue\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -17152
+      ],
+      "id": "b35a4ef0-a436-449f-aedb-08ae28ca8e38",
+      "name": "Flyingvoice"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\nimport html\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML principal\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le titre\ntitle = soup.title.string if soup.title else None\n\n# Trouver la div contenant l'attribut data-content\ndiv = soup.find('div', id='detail-blog')\n\nbody = None\n\nif div:\n    # Déséchapper le contenu HTML de data-content\n    data_content_html = html.unescape(div.get('data-content', ''))\n    content_soup = BeautifulSoup(data_content_html, \"html.parser\")\n\n    # Supprimer les styles inutiles\n    for style_tag in content_soup.find_all(\"style\"):\n        style_tag.decompose()\n\n    # Vérifier s'il y a une vidéo dans un script\n    video_found = False\n    for script_tag in content_soup.find_all(\"script\"):\n        if script_tag.string and 'video' in script_tag.string:\n            # Extraire la balise <video> depuis le script\n            video_soup = BeautifulSoup(script_tag.string, \"html.parser\")\n            video_tag = video_soup.find(\"video\")\n            if video_tag:\n                video_found = True\n                # Créer le conteneur video\n                container = content_soup.new_tag(\"div\", **{\"class\": \"video-container-yealink\"})\n                container.append(video_tag)\n                \n                # Remplacer le script par le conteneur\n                script_tag.replace_with(container)\n            else:\n                script_tag.decompose()\n        else:\n            script_tag.decompose()\n\n    # Si aucune vidéo, garder le reste du HTML\n    body = content_soup.decode_contents()\n\n# Retourner le résultat\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -16960
+      ],
+      "id": "bdb176a2-ea43-43f1-a60e-98ca72b8ce33",
+      "name": "Yealink"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"about-dt\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Supprimer le div avec la classe \"btn\"\n    btn_div = post_body_div.find(\"div\", class_=\"btn\")\n    if btn_div:\n        btn_div.decompose()  # Cela supprime le div \"btn\" et son contenu\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Vérifier si src est en base64\n        if src and src.startswith(\"data:\"):\n            img.decompose()  # Supprime l'image si base64\n            continue\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -16768
+      ],
+      "id": "9e486554-761a-47c7-9b6a-3f0925171944",
+      "name": "Fanvil"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"solu_chara_in solu_in\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -16576
+      ],
+      "id": "72ed482d-482b-4bf6-997d-c68b3e073f47",
+      "name": "Dinstar"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"sui-section sui-flex sui-flex-col is-style-size-m sui-gap-xl\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -16384
+      ],
+      "id": "961861e3-9862-4a77-b8cc-cdecec40a6dc",
+      "name": "Sangoma"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"container t3-mainbody\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = \"https://www.openvoxtech.com\"+src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -16192
+      ],
+      "id": "97aedc26-b51c-486f-be93-98e444fcb796",
+      "name": "OpenVox"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"entry clr blog-page-entry\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -15808
+      ],
+      "id": "ce917bb4-ec33-4aad-b2af-b5c36775188c",
+      "name": "Yeastar"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog\npost_body_div = soup.find(\"div\", class_=\"post-content\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -16000
+      ],
+      "id": "86ce4606-48a7-482e-9eee-68bc052b4202",
+      "name": "3CX"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"container\")\nright = post_body_div.find(\"div\", class_=\"right\")\n\nif right:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in right.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in right.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = right.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2560,
+        -15616
+      ],
+      "id": "f7a8bf84-e71b-4132-8f58-3b8cca0db5b8",
+      "name": "Milesight"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Grandstream",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "293adc99-bf8d-4947-95b4-7ab2a3e72c5e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Grandstream"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8e2e7110-c595-4d35-8d50-97c1399ba111",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Flyingvoice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Flyingvoice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ec05c4f9-7f10-4253-9e5b-ba833f096a55",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Yealink",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yealink"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3b123c48-0872-41ee-a89d-14ca55864f14",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Fanvil",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fanvil"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fad3f385-5b25-447f-89b9-e7b4c4533717",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Dinstar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Dinstar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "50b347a9-9f3f-401a-b294-54b60154ecc9",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Sangoma",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sangoma"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d34614bc-6d59-457e-933a-54ce7994efed",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "OpenVox",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OpenVox"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cf3df107-f45e-47b6-a168-03ec757e938d",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Yeastar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yeastar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2a2568f6-54d3-4b79-a729-83db726c01a7",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "3CX",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "3CX"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "61169945-898a-4882-83b7-1e10ff1ae661",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Milesight",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Milesight"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2784,
+        -16608
+      ],
+      "id": "9a7385a5-c1be-4845-bf79-4ec76a695a13",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Fanvil",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "47f66fd7-10d7-4a21-82af-5f6416b3685b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fanvil"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f5fd443b-34bf-4e4a-a9d6-3b01d76aebd3",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Flyingvoice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Flyingvoice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ef5370a8-c741-4949-bb30-95c74045e706",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Dinstar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Dinstar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e25d938c-7e8a-4f10-aa53-2662fe150ecd",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Milesight",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Milesight"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "900b7e17-f31f-413c-856c-d4faa48edee0",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Yealink",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yealink"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0b7aa2f5-37d9-4f89-bede-763e499cbbbd",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "Grandstream",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Grandstream"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -3904,
+        -14864
+      ],
+      "id": "cfaf1d88-d076-4809-a2df-528adaa5d2d1",
+      "name": "Switch3"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('RSS Read1').item.json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3008,
+        -16480
+      ],
+      "id": "06c25f64-c242-409e-b951-be4afa9e655d",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body }}",
+        "options": {
+          "systemMessage": "=Tu es un agent de marketing expert en rédaction web technique et SEO, très expérimenté dans la création de blogs impactants.\n\nTon rôle est de reformuler complètement cet article de blog {{ $json.body }} sous forme structurée, pour le republier sur notre propre plateforme d’entreprise.\n\n⚠️ Consignes impératives :\n\nFournir uniquement du HTML propre et sémantique, prêt à être publié, sans markdown ni sauts de ligne (\\n).\n\nLe contenu doit être entièrement reformulé avec tes propres mots, aucun copier-coller.\n\nUtiliser un langage professionnel, clair et adapté à un public B2B.\n\nRespecter une structure stricte :\n\n<h1> pour le titre principal\n\n<h2> pour les sous-titres\n\n<p> pour les paragraphes explicatifs\n\n<ul> / <ol> pour les listes\n\n<strong> pour les mots-clés importants\n\nSupprimer toute référence à la marque d’origine, à ses produits ou à ses vidéos.\n\nConserver les images uniquement sous forme de balises <img> avec un attribut alt pertinent et la dimension si disponible (width, height).\n\nAjouter un call-to-action clair à la fin, par exemple :\n<p><strong>Contactez Ennova Group</strong> pour transformer vos projets en réussites concrètes.</p>\n\nLe HTML généré doit être continu, sans retour à la ligne, prêt à être utilisé directement via une API WordPress.\n\n🎯 Objectif final :\nObtenir un article complet et structuré en HTML pur, au format similaire à l’exemple ci-dessous :\n<h1>Titre du blog reformulé</h1><p>Introduction reformulée et claire.</p><h2>Sous-titre 1</h2><p>Paragraphe explicatif avec <strong>mots-clés importants</strong>.</p><ul><li>Point clé 1</li><li>Point clé 2</li></ul><h2>Sous-titre 2</h2><p>Paragraphe explicatif...</p><img src=\"url-image.jpg\" alt=\"Description pertinente\" width=\"1200\" height=\"628\"><h2>Conclusion</h2><p>Résumé et transition vers l'appel à l'action.</p><p><strong>Contactez Ennova Group</strong> pour transformer vos projets en réussites concrètes.</p>\n\nGarde la langue originale du blog : {{ $json.body }}; si c'est en anglais le blog doit etre en anglais. Si c'est en français le blog doit etre en français . Sinon si c'est une autre langue le blog doit etre en anglais.\nSi le blog {{ $json.body }} contient de balise video alors garde bien la video dans le output \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2336,
+        -16528
+      ],
+      "id": "e30adce1-b03e-48de-ac91-a6ee29f144c6",
+      "name": "AI Agent4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4",
+          "mode": "list",
+          "cachedResultName": "Brand Blogs Content",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1285664785,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit#gid=1285664785"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Brand": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+            "content fetched": "={{ $('AI Agent4').item.json.output }}"
+          },
+          "matchingColumns": [
+            "Brand"
+          ],
+          "schema": [
+            {
+              "id": "Brand",
+              "displayName": "Brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Site URL",
+              "displayName": "Site URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Blog/News URL",
+              "displayName": "Blog/News URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scrapping",
+              "displayName": "scrapping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "RSS/Feed URL",
+              "displayName": "RSS/Feed URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "All Blogs html class",
+              "displayName": "All Blogs html class",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "single blog html class",
+              "displayName": "single blog html class",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "element",
+              "displayName": "element",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content fetched",
+              "displayName": "content fetched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_blog_link",
+              "displayName": "last_blog_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1984,
+        -16528
+      ],
+      "id": "9f86d518-4e39-4aae-8c0b-dbe20f03cada",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0CsV0GZSEqe9cKwx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b168686-24c9-4360-893e-efb5c00eef86",
+              "leftValue": "={{ $('Get row(s) in sheet').item.json.last_blog_link }}",
+              "rightValue": "={{ $json.Link }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3456,
+        -15024
+      ],
+      "id": "803ec3bf-d561-4766-80c9-ecd28a6d126d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Le code HTML en entrée (issu de l'input JSON)\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parse le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\ndiv = soup.find('div', class_='blog-latest-left body-card-item')\n\n# Récupérer l'attribut data-article\ndata_article = div.get('data-article')\n\nreturn [{\"Link\": \"https://www.yealink.com/en/blog/\"+data_article}]\n\n\n# Si des liens sont présents, récupérer le premier (qui correspond normalement au dernier article publié)"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        -14704
+      ],
+      "id": "7dddc015-b90f-4515-856a-83a884f22e2b",
+      "name": "Yealink_link"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Le code HTML en entrée (issu de l'input JSON)\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parse le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\nblog_box = soup.find('div', class_='blogs')\n# Trouver tous les éléments <a> avec l'attribut href\nlinks = blog_box.find_all('a', href=True)\n\n# Si des liens sont présents, récupérer le premier (qui correspond normalement au dernier article publié)\n\n# Si des liens sont présents\nif links:\n    # Extraire le href du premier lien et le concaténer avec l'URL de base\n    base_url = \"https://www.milesight.com\"\n    first_link = links[0]['href']  # Prendre le premier href\n    full_url = base_url + first_link  # Concaténer avec l'URL de base\nelse:\n    full_url = \"No links found\"  # Si aucun lien n'est trouvé\n\n# Retourner le résultat sous forme d'un dictionnaire JSON\nreturn [{\n    \"json\": {\n        \"Link\": full_url,\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        -14896
+      ],
+      "id": "b61776ad-3898-454a-9e94-e11d4b0232ff",
+      "name": "Milesight_link"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Le code HTML en entrée (issu de l'input JSON)\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parse le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\nblog_box = soup.find('div', class_='blog-box')\n\nclear = soup.find('ul', class_='clear')\n# Trouver tous les éléments <a> avec l'attribut href\nlinks = clear.find_all('a', href=True)\n\n# Si des liens sont présents, récupérer le premier (qui correspond normalement au dernier article publié)\n\n# Si des liens sont présents\nif links:\n    # Extraire le href du premier lien et le concaténer avec l'URL de base\n    base_url = \"https://www.dinstar.com/\"\n    first_link = links[0]['href']  # Prendre le premier href\n    full_url = base_url + first_link  # Concaténer avec l'URL de base\nelse:\n    full_url = \"No links found\"  # Si aucun lien n'est trouvé\n\n# Retourner le résultat sous forme d'un dictionnaire JSON\nreturn [{\n    \"json\": {\n        \"Link\": full_url,\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        -15088
+      ],
+      "id": "d1d49fa2-751e-421a-ac99-4932ed80c504",
+      "name": "Dinstar_link"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Le code HTML en entrée (issu de l'input JSON)\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parse le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\nwp = soup.find('div', class_='blogdiv')\n\n# Trouver tous les éléments <a> avec l'attribut href\nlinks = wp.find_all('a', href=True)\n\n# Si des liens sont présents, récupérer le premier (qui correspond normalement au dernier article publié)\n\n# Si des liens sont présents\nif links:\n    # Extraire le href du premier lien et le concaténer avec l'URL de base\n    base_url = \"https://www.flyingvoice.com/\"\n    first_link = links[0]['href']  # Prendre le premier href\n    full_url = base_url + first_link  # Concaténer avec l'URL de base\nelse:\n    full_url = \"No links found\"  # Si aucun lien n'est trouvé\n\n# Retourner le résultat sous forme d'un dictionnaire JSON\nreturn [{\n    \"json\": {\n        \"Link\": full_url,\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        -15280
+      ],
+      "id": "3b3d8ec4-783c-41f8-a00b-965af8e66f54",
+      "name": "Flyingvoice_link"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Le code HTML en entrée (issu de l'input JSON)\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parse le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\nwp = soup.find('div', class_='wp')\n\nabout_newsL1 = soup.find('ul', class_='about-newsL1')\n# Trouver tous les éléments <a> avec l'attribut href\nlinks = about_newsL1.find_all('a', href=True)\n\n# Si des liens sont présents, récupérer le premier (qui correspond normalement au dernier article publié)\n\n# Si des liens sont présents\nif links:\n    # Extraire le href du premier lien et le concaténer avec l'URL de base\n    base_url = \"https://www.fanvil.com\"\n    first_link = links[0]['href']  # Prendre le premier href\n    full_url = base_url + first_link  # Concaténer avec l'URL de base\nelse:\n    full_url = \"No links found\"  # Si aucun lien n'est trouvé\n\n# Retourner le résultat sous forme d'un dictionnaire JSON\nreturn [{\n    \"json\": {\n        \"Link\": full_url,\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        -15472
+      ],
+      "id": "09c450d9-b0a7-434b-8b23-4261177f8232",
+      "name": "Fanvil_link"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4",
+          "mode": "list",
+          "cachedResultName": "Brand Blogs Content",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1285664785,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit#gid=1285664785"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Brand": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+            "last_blog_link": "={{ $json.Link }}"
+          },
+          "matchingColumns": [
+            "Brand"
+          ],
+          "schema": [
+            {
+              "id": "Brand",
+              "displayName": "Brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Site URL",
+              "displayName": "Site URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Blog/News URL",
+              "displayName": "Blog/News URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scrapping",
+              "displayName": "scrapping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "RSS/Feed URL",
+              "displayName": "RSS/Feed URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "All Blogs html class",
+              "displayName": "All Blogs html class",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "single blog html class",
+              "displayName": "single blog html class",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "element",
+              "displayName": "element",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content fetched",
+              "displayName": "content fetched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_blog_link",
+              "displayName": "last_blog_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3232,
+        -14512
+      ],
+      "id": "4b46d787-eafe-4e49-9ae7-a2d310bbb76a",
+      "name": "Update row in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0CsV0GZSEqe9cKwx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4",
+          "mode": "list",
+          "cachedResultName": "Brand Blogs Content",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1285664785,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LvDqnYRM5V_zannJiT5yUv9Pw1ZH1d71nIHoPTmLLP4/edit#gid=1285664785"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Brand": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+            "last_blog_link": "={{ $json.guid }}"
+          },
+          "matchingColumns": [
+            "Brand"
+          ],
+          "schema": [
+            {
+              "id": "Brand",
+              "displayName": "Brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Site URL",
+              "displayName": "Site URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Blog/News URL",
+              "displayName": "Blog/News URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scrapping",
+              "displayName": "scrapping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "RSS/Feed URL",
+              "displayName": "RSS/Feed URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "All Blogs html class",
+              "displayName": "All Blogs html class",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "single blog html class",
+              "displayName": "single blog html class",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "element",
+              "displayName": "element",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "content fetched",
+              "displayName": "content fetched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "last_blog_link",
+              "displayName": "last_blog_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3232,
+        -16480
+      ],
+      "id": "a4bfda49-5cae-441c-a4ee-4490a979e2e1",
+      "name": "Update row in sheet5",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0CsV0GZSEqe9cKwx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b168686-24c9-4360-893e-efb5c00eef86",
+              "leftValue": "={{ $('Get row(s) in sheet').item.json.last_blog_link }}",
+              "rightValue": "={{ $json.guid }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3456,
+        -16000
+      ],
+      "id": "4d463e7b-a134-453b-adf2-4fd6d9a3f830",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1760,
+        -15424
+      ],
+      "id": "52f081d4-0e65-448c-91e1-0662a70d1a37",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Le code HTML en entrée (issu de l'input JSON)\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parse le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\nblog_box = soup.find('div', class_='post-listing-simple')\n\n#clear = soup.find('ul', class_='clear')\n# Trouver tous les éléments <a> avec l'attribut href\nlinks = blog_box.find_all('a', href=True)\n\n# Si des liens sont présents, récupérer le premier (qui correspond normalement au dernier article publié)\n\n# Si des liens sont présents\nif links:\n    # Extraire le href du premier lien et le concaténer avec l'URL de base\n    base_url = \"https://www.dinstar.com/\"\n    first_link = links[0]['href']  # Prendre le premier href\nelse:\n    first_link = \"No links found\"  # Si aucun lien n'est trouvé\n\n# Retourner le résultat sous forme d'un dictionnaire JSON\nreturn [{\n    \"json\": {\n        \"Link\": first_link,\n    }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        -14512
+      ],
+      "id": "59694932-d797-4814-871f-898ea8d6e7ae",
+      "name": "Dinstar_link1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -3680,
+        -16000
+      ],
+      "id": "73a3e73f-c313-4e75-832f-07a6462373bd",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron (every 2h)1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grandstream": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Grandstream",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flyingvoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Yealink",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fanvil",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dinstar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sangoma",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenVox",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Yeastar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "3CX",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Milesight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flyingvoice": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "Fanvil_link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flyingvoice_link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dinstar_link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Milesight_link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Yealink_link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dinstar_link1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fanvil": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dinstar": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sangoma": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenVox": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yeastar": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3CX": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Milesight": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yealink": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yealink_link": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Milesight_link": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dinstar_link": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flyingvoice_link": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fanvil_link": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dinstar_link1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4cee8752-b7da-4f7b-a542-70adac243caf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "612674cd98977dc74567f02f7faaa4bea41829545d73644a2be3b3d2e77ca778"
+  },
+  "id": "wDiTJVfpSXI0o31T",
+  "tags": []
+}
