@@ -1,0 +1,923 @@
+{
+  "name": "All_Brand_Blogs_Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyX"
+            }
+          ]
+        }
+      },
+      "id": "ade90d80-1f97-4933-8932-883bda044450",
+      "name": "Cron (every 2h)1",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14POmiGDqpTuGV1tBlyxcOOPcRAGT70T3HBbPfvaelpI",
+          "mode": "list",
+          "cachedResultName": "All_Brand_blogs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14POmiGDqpTuGV1tBlyxcOOPcRAGT70T3HBbPfvaelpI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1371727792,
+          "mode": "list",
+          "cachedResultName": "Feuille 2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14POmiGDqpTuGV1tBlyxcOOPcRAGT70T3HBbPfvaelpI/edit#gid=1371727792"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "No"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -896,
+        1376
+      ],
+      "id": "b49649f7-be64-4270-aaf7-865a3f111e7e",
+      "name": "Get row(s) in sheet",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0CsV0GZSEqe9cKwx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -672,
+        1376
+      ],
+      "id": "994efb4c-e9a8-4788-a23b-66fb2453a0a2",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.BlogURL }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -448,
+        864
+      ],
+      "id": "b05929cc-8e99-4f51-8ba4-bf7181aa48c6",
+      "name": "HTTP Request2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"section post-body\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8ca8f646-2cc8-41ec-8aa8-89f52850f1fd",
+      "name": "Grandstream"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"blog-con\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Vérifier si src est en base64\n        if src and src.startswith(\"data:\"):\n            img.decompose()  # Supprime l'image si base64\n            continue\n\n        if src and src.startswith(\"/\"):\n            src = \"https://www.flyingvoice.com/\" + src\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ],
+      "id": "f17fa34d-51d9-48fe-be20-3aa029e4cb42",
+      "name": "Flyingvoice"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\nimport html\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML principal\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le titre\ntitle = soup.title.string if soup.title else None\n\n# Trouver la div contenant l'attribut data-content\ndiv = soup.find('div', id='detail-blog')\n\nbody = None\n\nif div:\n    # Déséchapper le contenu HTML de data-content\n    data_content_html = html.unescape(div.get('data-content', ''))\n    content_soup = BeautifulSoup(data_content_html, \"html.parser\")\n\n    # Supprimer les styles inutiles\n    for style_tag in content_soup.find_all(\"style\"):\n        style_tag.decompose()\n\n    # Vérifier s'il y a une vidéo dans un script\n    video_found = False\n    for script_tag in content_soup.find_all(\"script\"):\n        if script_tag.string and 'video' in script_tag.string:\n            # Extraire la balise <video> depuis le script\n            video_soup = BeautifulSoup(script_tag.string, \"html.parser\")\n            video_tag = video_soup.find(\"video\")\n            if video_tag:\n                video_found = True\n                # Créer le conteneur video\n                container = content_soup.new_tag(\"div\", **{\"class\": \"video-container-yealink\"})\n                container.append(video_tag)\n                \n                # Remplacer le script par le conteneur\n                script_tag.replace_with(container)\n            else:\n                script_tag.decompose()\n        else:\n            script_tag.decompose()\n\n    # Si aucune vidéo, garder le reste du HTML\n    body = content_soup.decode_contents()\n\n# Retourner le résultat\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        384
+      ],
+      "id": "a8818fda-3500-405e-9239-6e3c33cd0ff5",
+      "name": "Yealink"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"about-dt\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Supprimer le div avec la classe \"btn\"\n    btn_div = post_body_div.find(\"div\", class_=\"btn\")\n    if btn_div:\n        btn_div.decompose()  # Cela supprime le div \"btn\" et son contenu\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Vérifier si src est en base64\n        if src and src.startswith(\"data:\"):\n            img.decompose()  # Supprime l'image si base64\n            continue\n        # Convertir les URLs relatives en absolues\n        if src and src.startswith(\"/\"):\n            src = \"https://fanvil.com\" + src\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        576
+      ],
+      "id": "8e7b0065-47b8-40cf-9008-f2fcbb3c086e",
+      "name": "Fanvil"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"solu_chara_in solu_in\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        768
+      ],
+      "id": "bb1c5daf-4ee4-404c-bc7b-4220d08047c5",
+      "name": "Dinstar"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"sui-section sui-flex sui-flex-col is-style-size-m sui-gap-xl\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        960
+      ],
+      "id": "2749bde3-7b8b-4dae-849a-25daa45efcf7",
+      "name": "Sangoma"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"container t3-mainbody\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = \"https://www.openvoxtech.com\"+src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1152
+      ],
+      "id": "a28c789d-fb64-47b0-b6f3-9f6b9c852f28",
+      "name": "OpenVox"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"entry clr blog-page-entry\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1536
+      ],
+      "id": "970ab78d-1f3d-476d-9256-d6b46cd7ebd7",
+      "name": "Yeastar"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog\npost_body_div = soup.find(\"div\", class_=\"post-content\")\n\nif post_body_div:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in post_body_div.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in post_body_div.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = post_body_div.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1344
+      ],
+      "id": "a9f48259-240f-4065-8b9b-60a46a0e5b81",
+      "name": "3CX"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "from bs4 import BeautifulSoup\n\n# Récupérer le champ \"data\" de l'input JSON\nhtml_content = items[0][\"json\"][\"data\"]\n\n# Parser le HTML avec BeautifulSoup\nsoup = BeautifulSoup(html_content, \"html.parser\")\n\n# Extraire le <title>\ntitle = soup.title.string if soup.title else None\n\n# Extraire le <body>\n# body = soup.body.get_text(separator=\"\\n\", strip=True) if soup.body else None\n\nbody = soup.body.decode_contents() if soup.body else None\n\n# Récupérer le contenu du blog (dans le div.section.post-body)\npost_body_div = soup.find(\"div\", class_=\"container\")\nright = post_body_div.find(\"div\", class_=\"right\")\n\nif right:\n    # Supprimer toutes les balises <script> et <style>\n    for tag in right.find_all([\"script\", \"style\"]):\n        tag.decompose()\n\n    # Pour chaque image, on ne garde que src, width, height\n    for img in right.find_all(\"img\"):\n        src = img.get(\"src\")\n        width = img.get(\"width\")\n        height = img.get(\"height\")\n\n        # Vérifier si l'URL est relative et la transformer en absolue\n        if src and src.startswith(\"/\"):\n           src = \"https://www.milesight.com\" + src\n  \n        # Supprimer tous les attributs\n        img.attrs = {}\n\n        # Réinjecter seulement ce qu’on veut\n        if src:\n            img[\"src\"] = src\n        if width:\n            img[\"width\"] = width\n        if height:\n            img[\"height\"] = height\n    # Garder le contenu HTML interne du div\n    body = right.decode_contents()\nelse:\n    body = None\n# Retourner les résultats\nreturn [{\n    \"json\": {\n        \"title\": title,\n        \"body\": body\n    }\n}]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        1728
+      ],
+      "id": "785202c5-87eb-453a-94d0-98c7a96cfe29",
+      "name": "Milesight"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "grandstream",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "293adc99-bf8d-4947-95b4-7ab2a3e72c5e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Grandstream"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8e2e7110-c595-4d35-8d50-97c1399ba111",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "flyingvoice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Flyingvoice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ec05c4f9-7f10-4253-9e5b-ba833f096a55",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "yealink",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yealink"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3b123c48-0872-41ee-a89d-14ca55864f14",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "fanvil",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fanvil"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fad3f385-5b25-447f-89b9-e7b4c4533717",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "dinstar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Dinstar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "50b347a9-9f3f-401a-b294-54b60154ecc9",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "sangoma",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sangoma"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d34614bc-6d59-457e-933a-54ce7994efed",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "openvox",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "OpenVox"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cf3df107-f45e-47b6-a168-03ec757e938d",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "yeastar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yeastar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2a2568f6-54d3-4b79-a729-83db726c01a7",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "3cx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "3CX"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "61169945-898a-4882-83b7-1e10ff1ae661",
+                    "leftValue": "={{ $('Get row(s) in sheet').item.json.Brand }}",
+                    "rightValue": "milesight",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Milesight"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -224,
+        736
+      ],
+      "id": "ff819478-3a07-40ec-bdca-f0bdc9bda031",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body }}",
+        "options": {
+          "systemMessage": "={\n\"role\": \"system\",\n\"identity\": \"Agent de marketing expert en rédaction web technique et SEO, spécialisé dans la création de blogs B2B impactants.\",\n\"mission\": \"Reformuler entièrement le contenu fourni en HTML pur, propre et sémantique, prêt pour publication sur la plateforme de l’entreprise, en visant une performance SEO élevée.\",\n\"input\": {\n\"source_article\": \"{{ $json.body }}\"\n},\n\"length\": {\n\"min_words\": 1000,\n\"policy\": \"Produire un article d’au moins 1000 mots, dense en informations utiles et sans remplissage artificiel.\"\n},\n\"directives\": {\n\"style\": [\n\"Langage professionnel, clair, orienté B2B.\",\n\"Texte entièrement reformulé: aucun copier-coller.\",\n\"Ton expert, pédagogique et orienté valeur.\"\n],\n\"html_only\": true,\n\"no_markdown\": true,\n\"no_newlines_in_output\": true,\n\"remove_source_brand_references\": true,\n\"keep_videos_if_present\": true,\n\"images_policy\": \"Conserver les images sous forme de <img> avec un attribut alt pertinent et les dimensions si disponibles (width, height).\",\n\"cta_policy\": \"Ajouter un appel à l’action clair à la fin: <p><strong>Contactez Ennova Group</strong> pour transformer vos projets en réussites concrètes.</p>\"\n},\n\"structure\": {\n\"required_tags\": [\n\"<h1>\",\n\"<h2>\",\n\"<p>\",\n\"<ul>/<ol>\",\n\"<strong>\",\n\"<img>\"\n],\n\"rules\": [\n\"Utiliser <h1> pour le titre principal.\",\n\"Utiliser <h2> pour les sous-titres de sections.\",\n\"Utiliser <p> pour les paragraphes explicatifs.\",\n\"Utiliser <ul> ou <ol> pour les listes, avec <li> pour chaque élément.\",\n\"Utiliser <strong> pour mettre en évidence les mots-clés.\",\n\"Intégrer les images avec <img src=\\\"...\\\" alt=\\\"...\\\" [width=\\\"...\\\"] [height=\\\"...\\\"]> si connu.\"\n]\n},\n\"language_policy\": {\n\"rule\": \"Garder la langue d’origine du contenu source. Si le contenu est en anglais, produire en anglais. S’il est en français, produire en français. Sinon (autre langue), produire en anglais.\"\n},\n\"seo\": {\n\"goal\": \"Haute compatibilité SEO (on-page) sans sacrifier la clarté B2B.\",\n\"keywords\": {\n\"extraction\": \"Identifier 3–6 mots-clés et expressions clés à partir du sujet du contenu source (et leurs variantes/synonymes).\",\n\"usage\": \"Intégrer naturellement les mots-clés dans le <h1>, certains <h2>, les premiers 100–150 mots, et le reste du corps avec une densité raisonnable (≈1–2%).\",\n\"semantic\": \"Inclure des variantes sémantiques (LSI) et des cooccurrences pertinentes.\"\n},\n\"readability\": \"Phrases claires, paragraphes courts, listes à puces pour la scannabilité.\",\n\"headings\": \"Titres descriptifs avec bénéfices/intentions utilisateur; éviter les formulations vagues.\",\n\"links\": {\n\"internal\": \"Ajouter 1–2 liens internes génériques si pertinent avec <a href=\\\"#\\\" rel=\\\"nofollow\\\"> (placeholders autorisés).\",\n\"external\": \"Ajouter 1 lien externe d’autorité si pertinent avec rel=\\\"nofollow\\\"; pas de mention de la marque source.\"\n},\n\"media\": \"Fournir des alt text descriptifs et orientés intention pour chaque image.\",\n\"faq_optional\": \"Optionnel: ajouter une section FAQ (<h2>FAQ</h2> + <ul><li>Q/R</li></ul>) si cela renforce l’intention de recherche.\",\n\"avoid\": [\n\"Bourrage de mots-clés.\",\n\"Duplicate content.\",\n\"Références à la marque/source d’origine.\"\n]\n},\n\"output_requirements\": {\n\"format\": \"HTML pur, continu, en une seule ligne (aucun \\\\n), sans markdown.\",\n\"publishing_ready\": true,\n\"api_target\": \"Directement utilisable via une API WordPress.\"\n},\n\"forbidden_content\": [\n\"Toute référence à la marque d’origine, à ses produits ou à ses vidéos (hors balises <video> conservées si présentes).\",\n\"Copier-coller du texte source.\"\n],\n\"example_output\": \"<h1>Titre du blog reformulé</h1><p>Introduction reformulée et claire avec intégration naturelle de mots-clés principaux.</p><h2>Sous-titre 1 orienté bénéfices</h2><p>Paragraphe explicatif avec <strong>mots-clés importants</strong> et variantes sémantiques.</p><ul><li>Point clé 1</li><li>Point clé 2</li></ul><h2>Sous-titre 2</h2><p>Paragraphe explicatif approfondi.</p><img src=\\\"url-image.jpg\\\" alt=\\\"Description pertinente alignée avec l’intention de recherche\\\" width=\\\"1200\\\" height=\\\"628\\\"><h2>FAQ</h2><ul><li><strong>Question 1:</strong> Réponse concise et utile.</li><li><strong>Question 2:</strong> Réponse orientée résultat.</li></ul><h2>Conclusion</h2><p>Résumé et transition vers l'appel à l'action.</p><p><strong>Contactez Ennova Group</strong> pour transformer vos projets en réussites concrètes.</p>\",\n\"validation_checklist\": [\n\"Le HTML est-il sur une seule ligne sans \\\\n ?\",\n\"Nombre de mots ≥ 1000 ?\",\n\"Aucune référence à la marque d’origine subsiste-t-elle ?\",\n\"Mots-clés principaux et variantes intégrés naturellement (≈1–2%) ?\",\n\"Titres/sous-titres optimisés et informatifs ?\",\n\"Paragraphes <p> clairs et scannables; listes utilisées quand pertinent ?\",\n\"Mots-clés importants balisés avec <strong> sans excès ?\",\n\"Images avec alt pertinents (et width/height si disponibles) ?\",\n\"Section FAQ ajoutée si utile ?\",\n\"1–2 liens internes (placeholder) et 1 lien externe d’autorité rel=\\\"nofollow\\\" si pertinent ?\",\n\"CTA final Ennova Group présent ?\",\n\"Ton professionnel B2B maintenu ?\",\n\"Aucune duplication de contenu; reformulation complète.\"\n]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        864
+      ],
+      "id": "6f4cd835-d0b5-4896-b626-fcc59ebcaec7",
+      "name": "AI Agent4",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14POmiGDqpTuGV1tBlyxcOOPcRAGT70T3HBbPfvaelpI",
+          "mode": "list",
+          "cachedResultName": "All_Brand_blogs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14POmiGDqpTuGV1tBlyxcOOPcRAGT70T3HBbPfvaelpI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1371727792,
+          "mode": "list",
+          "cachedResultName": "Feuille 2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14POmiGDqpTuGV1tBlyxcOOPcRAGT70T3HBbPfvaelpI/edit#gid=1371727792"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "BlogURL": "={{ $('Get row(s) in sheet').item.json.BlogURL }}",
+            "status": "Yes",
+            "Blog_content": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "BlogURL"
+          ],
+          "schema": [
+            {
+              "id": "BlogURL",
+              "displayName": "BlogURL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Brand",
+              "displayName": "Brand",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Blog_content",
+              "displayName": "Blog_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Published",
+              "displayName": "Published",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        1376
+      ],
+      "id": "04a57a58-a066-4e90-b819-e73c7d2124fa",
+      "name": "Update row in sheet",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0CsV0GZSEqe9cKwx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        320,
+        1216
+      ],
+      "id": "53147558-fd21-4fbc-920c-0f26928a8935",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FLgTk0l9EBmzVd1E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron (every 2h)1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grandstream": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flyingvoice": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yealink": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fanvil": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dinstar": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sangoma": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenVox": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yeastar": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3CX": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Milesight": {
+      "main": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Grandstream",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flyingvoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Yealink",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fanvil",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dinstar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sangoma",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenVox",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Yeastar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "3CX",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Milesight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8419af4a-a06b-4960-9ab3-5c882337e123",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "612674cd98977dc74567f02f7faaa4bea41829545d73644a2be3b3d2e77ca778"
+  },
+  "id": "Qo6HF2d7TAFFDjPF",
+  "tags": []
+}
